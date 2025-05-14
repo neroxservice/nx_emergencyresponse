@@ -11,6 +11,7 @@ Es simuliert automatisierte Notrufe mit zufälligen Wartezeiten, sorgt für ein 
 - Zufällige Generierung von Notrufen (zwischen **20 Minuten und 2 Stunden**).
 - Log-Ausgabe in **Minuten und Stunden** für bessere Planbarkeit.
 - Automatischer Check, ob ein Sanitäter (Job: `ambulance`) **im Dienst** ist – andernfalls wird kein Einsatz gestartet.
+- EmergencyDispatch Integration für die Dispatches.
 
 ### 🧠 Intelligente Ressourcensteuerung
 - Einsätze werden **nur dann** gestartet, wenn der Server vollständig geladen und bereit ist.
@@ -26,7 +27,8 @@ Es simuliert automatisierte Notrufe mit zufälligen Wartezeiten, sorgt für ein 
 
 ### 📦 Kompatibilität mit folgenden Frameworks
 - Unterstützung für [**QBCore**](https://github.com/qbcore-framework/qb-core)
-- [**QB-Target**](https://github.com/qbcore-framework/qb-target/tree/main) für Interaktionen 
+- [**QB-Target**](https://github.com/qbcore-framework/qb-target/tree/main) für Interaktionen
+- [**EmergencyDispatch**](https://shop.loverp-scripts.de/package/4887641) `Anforderung - Anpassbar mit bisschen Coding Verstädnis`
 
 ## 🤝 Mitwirken
 - Pull Requests, Issues oder Funktionsvorschläge sind herzlich willkommen.
