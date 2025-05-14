@@ -27,6 +27,10 @@ Es simuliert automatisierte Notrufe mit zufälligen Wartezeiten, sorgt für ein 
 ### 📦 Kompatibilität mit folgenden Frameworks
 - Unterstützung für [**QBCore**](https://github.com/qbcore-framework/qb-core)
 - [**QB-Target**](https://github.com/qbcore-framework/qb-target/tree/main) für Interaktionen 
+
+## 🤝 Mitwirken
+- Pull Requests, Issues oder Funktionsvorschläge sind herzlich willkommen.
+- Hinterlasse ein ⭐ auf GitHub, wenn dir das Projekt gefällt.
 ---
 
 ## 🔧 Konfiguration
@@ -34,3 +38,4 @@ Es simuliert automatisierte Notrufe mit zufälligen Wartezeiten, sorgt für ein 
 ```lua
 -- config.lua
 Config.SpawnInterval = 2700000 -- DEAKTIVIERT! Wird nun automatisch durch Random Timer ersetzt.
+
