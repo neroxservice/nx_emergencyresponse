@@ -46,7 +46,7 @@ RegisterNetEvent("nx_emergency:checkForMedics", function()
             TriggerClientEvent("nx_emergency:startCountdown", id)
         end
     else
-        TriggerClientEvent("QBCore:Notify", source, "Kein Mediziner im Dienst!", "error")
+        --TriggerClientEvent("QBCore:Notify", source, "Kein Mediziner im Dienst!", "error")
     end
 end)
 
