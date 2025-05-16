@@ -16,11 +16,6 @@ local countdownTime = 0
 
 local witnessNPCs = {}
 
---[[ Config.SpawnLocations = {
-    vector3(215.76, -810.12, 30.73),
-    vector3(-2037.1758, 2848.2026, 32.8104),
-} ]]
-
 RegisterNetEvent("nx_emergency:startCountdown", function()
     StartCountdown(1800)
 end)
@@ -250,7 +245,9 @@ function TreatNPC(netId)
         disableCombat = true,
     }, {}, {}, function()
         ClearPedTasks(playerPed)
-        QBCore.Functions.Notify("Behandlung abgebrochen", "error")
+        TriggerServerEvent("nx_emergency:stopCountdownForAll")
+        countdownActive = false
+        countdownTime = 0
     end, function()
         ClearPedTasks(playerPed)
 
@@ -265,7 +262,10 @@ function TreatNPC(netId)
                 TriggerServerEvent("nx_emergency:removeNPC", netId)
             end
         end)
+        Wait(500)
         TriggerServerEvent("nx_emergency:stopCountdownForAll")
+        countdownActive = false
+        countdownTime = 0
 
         QBCore.Functions.Notify("Bahdandlung abgeschlossen", "success")
     end)

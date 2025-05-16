@@ -9,6 +9,7 @@ function SendDispatch(coords)
         message = Config.DispatchMessage
     }
     TriggerClientEvent("nx_emergency:stopCountdown", -1)
+    Wait(500)
     TriggerEvent('emergencydispatch:emergencycall:new', Config.DispatchJob, Config.DispatchMessage, coords, true)
 end
 
@@ -34,7 +35,7 @@ RegisterNetEvent("nx_emergency:checkForMedics", function()
         local Player = QBCore.Functions.GetPlayer(playerId)
         if Player then
             local job = Player.PlayerData.job
-            if job.name == "ambulance" or job.name == "slk" or job.name == "hrf" and job.onduty then
+            if (job.name == "ambulance" or job.name == "slk" or job.name == "hrf") and job.onduty then
                 table.insert(medicsOnDuty, playerId)
             end
         end
@@ -50,6 +51,7 @@ RegisterNetEvent("nx_emergency:checkForMedics", function()
 end)
 
 RegisterNetEvent("nx_emergency:stopCountdownForAll", function()
+    Wait(1000)
     TriggerClientEvent("nx_emergency:stopCountdown", -1)
 end)
 
@@ -62,7 +64,7 @@ function isAmbulanceOnDuty()
         local Player = QBCore.Functions.GetPlayer(playerId)
         if Player then
             local job = Player.PlayerData.job
-            if job.name == "ambulance" or job.name == "slk" or job.name == "hrf" and job.onduty then
+            if (job.name == "ambulance" or job.name == "slk" or job.name == "hrf") and job.onduty then
                 return true
             end
         end
@@ -72,7 +74,7 @@ end
 
 CreateThread(function()
     while true do
-        local randomWait = math.random(2200000, 7200000)
+        local randomWait = math.random(1500000, 3200000)
         local waitMinutes = math.floor(randomWait / 60000)
 
         if waitMinutes >= 60 then
@@ -98,7 +100,7 @@ end)
 
 --[[ CreateThread(function()
     while true do
-        Wait(Config.SpawnInterval)
+        Wait(5000)
 
         if isAmbulanceOnDuty() then
             StartEmergencyCall()
@@ -125,7 +127,6 @@ end)
 
 RegisterServerEvent("nx_emergency:removeNPC")
 AddEventHandler("nx_emergency:removeNPC", function(netId)
-    TriggerClientEvent("nx_emergency:stopCountdown", -1)
     TriggerClientEvent("nx_emergency:deleteNPC", -1, netId)
     activeNPCs[netId] = nil
 end)
@@ -145,9 +146,6 @@ end)
 
 RegisterNetEvent("nx_emergency:npcTimeout", function()
     TriggerClientEvent("nx_emergency:removeNPC", -1, netId)
-    TriggerClientEvent("nx_emergency:stopCountdown", -1)
-
-
 
     local players = QBCore.Functions.GetPlayers()
     for _, playerId in pairs(players) do
@@ -227,7 +225,7 @@ local cyan = "\27[36m"
 local red = "\27[31m"
 local reset = "\27[0m"
 
-local currentVersion = "v1.4.1"
+local currentVersion = "v1.4.3"
 
 local githubUser = "neroxservice"
 local githubRepo = "nx_emergencyresponse"
@@ -277,27 +275,3 @@ AddEventHandler("onResourceStart", function(resourceName)
         end)
     end
 end)
-
-
---[[ local _0x1b4f = {
-    "onResourceStart",
-    function(_0x3f47)
-        if _0x3f47 == GetCurrentResourceName() then
-            print(yellow .. "--------------------------------------------------------" .. reset)
-            print(magenta .. "[nx_EmergencyResponse]" .. green .. " - Du nutzt die aktuelle Version!")
-            print(cyan .. "📦AAktuelle Version: " .. blue .. "v1.3.5")
-            print(green .. "📰NNews:" .. reset)
-            print(" - " .. green .. "Emergency Response Timer is yet randomized.")
-            --print(" - " .. green .. "Emergency Caller spawned with  patient with a randomized text")
-            --print("   " .. green .. "integration for injury information's as dialog integration.")
-            --print(" - " .. green .. "integration for injury information's as dialog integration.")
-            print("")
-            print("^3📅 Datum:^7 " .. os.date("%d.%m.%Y %H:%M:%S"))
-            print("🔗 " .. cyan .. "Neuste Version: " .. blue .. "https://keymaster.fivem.net/")
-            print(yellow .. "--------------------------------------------------------" .. reset)
-        end
-    end
-}
-
-AddEventHandler(_0x1b4f[1], _0x1b4f[2])
- ]]
