@@ -13,6 +13,14 @@ Es simuliert automatisierte Notrufe mit zufälligen Wartezeiten, sorgt für ein 
 - Automatischer Check, ob ein Sanitäter (Job: `ambulance`) **im Dienst** ist – andernfalls wird kein Einsatz gestartet.
 - EmergencyDispatch Integration für die Dispatches.
 
+### 🎯 Einsätze steuern
+- Einsätze können jetzt auf dauer deaktiviert werden
+  - Ebenso auch wieder gestartet werden
+ 
+### 🎯 Countdown
+- Es wird ein Countdown angezeigt wie lange der Einsatz noch active bleibt bis er deaktiviert wird.
+   [✅] Count resettet sich ebenfalls wieder richtig.
+
 ### 🧠 Intelligente Ressourcensteuerung
 - Einsätze werden **nur dann** gestartet, wenn der Server vollständig geladen und bereit ist.
 - Ressourcen- und Performance-schonend durch `CreateThread` mit dynamischem `Wait`.
