@@ -1,7 +1,7 @@
 # 🚑 nx_EmergencyResponse
 
 **`nx_EmergencyResponse`** ist ein leistungsstarkes, immersives und vollständig dynamisches Sanitäter-Jobscript für FiveM-Server, das sowohl Gameplay als auch Serververwaltung auf ein neues Level hebt.  
-Es simuliert automatisierte Notrufe mit zufälligen Wartezeiten, sorgt für ein realistisches Einsatzgefühl und enthält moderne Entwickler-Tools wie automatische Versionserkennung.
+Es simuliert automatisierte Notrufe mit zufälligen Wartezeiten, sorgt für ein realistisches Einsatzgefühl und enthält eine automatische Versionserkennung für bessere Updates Mitteillungen.
 
 ---
 
