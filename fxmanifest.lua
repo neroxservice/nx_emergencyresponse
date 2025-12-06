@@ -4,7 +4,8 @@ lua54 'yes'
 
 description 'Emergency Response Script - QBCore'
 author 'NeroX Service (Owner: xrealchronosskt) (Invite: https://discord.gg/9aVsQtR8ew)'
-version 'v1.4.3'
+tebex 'https://neroxservice.tebex.io/'
+version 'v1.7.1'
 
 shared_script {
     'config/config.lua',

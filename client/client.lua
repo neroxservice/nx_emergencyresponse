@@ -7,40 +7,9 @@ local npcModels = {
     "a_m_y_soucent_01",
 }
 
-local npcTimer = nil
-
 local npcManager = {}
-local npcManager2 = {}
 local countdownActive = false
 local countdownTime = 0
-
-local witnessNPCs = {}
-
-RegisterNetEvent("nx_emergency:startCountdown", function()
-    StartCountdown(1800)
-end)
-
-function StartCountdown(durationInSeconds)
-    countdownTime = durationInSeconds
-    countdownActive = true
-
-    CreateThread(function()
-        while countdownTime > 0 and countdownActive do
-            Wait(1000)
-            countdownTime = countdownTime - 1
-        end
-
-        if countdownTime <= 0 and countdownActive then
-            countdownActive = false
-            TriggerServerEvent("nx_emergency:timeout")
-        end
-    end)
-end
-
-RegisterNetEvent("nx_emergency:stopCountdown", function()
-    countdownActive = false
-    countdownTime = 0
-end)
 
 function CreateEmergencyNPC(data)
     local modelHash = GetHashKey(npcModels[math.random(#npcModels)])
@@ -104,122 +73,7 @@ function CreateEmergencyNPC(data)
         },
         distance = 2.0
     })
-
-    SpawnWitness(ped)
 end
-
-RegisterNetEvent("nx_emergency:spawnWitnessClient")
-AddEventHandler("nx_emergency:spawnWitnessClient", function(pedNetId)
-    local ped = NetworkGetEntityFromNetworkId(pedNetId)
-    if DoesEntityExist(ped) then
-        SpawnWitness(ped)
-    end
-end)
-
-function SpawnWitness(ped)
-    local model = GetHashKey("a_f_m_ktown_02")
-    RequestModel(model)
-    while not HasModelLoaded(model) do Wait(0) end
-
-    local pedCoords = GetEntityCoords(ped)
-    local heading = GetEntityHeading(ped)
-
-    local offset = GetOffsetFromCoordAndHeadingInWorldCoords(pedCoords.x, pedCoords.y, pedCoords.z, heading, 1.5, 0.0,
-        0.0)
-
-    local found, groundZ = GetGroundZFor_3dCoord(offset.x, offset.y, offset.z + 1.0, 0)
-    if not found then
-        found, groundZ = GetGroundZFor_3dCoord(offset.x, offset.y, offset.z + 5.0, 0)
-    end
-
-    if not found then
-        groundZ = offset.z
-    end
-
-    if groundZ == offset.z then
-        groundZ = pedCoords.z
-    end
-
-    local witness = CreatePed(0, model, offset.x, offset.y, groundZ, heading, false, true)
-
-    SetEntityAsMissionEntity(witness, true, true)
-    NetworkRegisterEntityAsNetworked(witness)
-
-    Citizen.Wait(1000)
-    local pedNetId = NetworkGetNetworkIdFromEntity(witness)
-    if pedNetId == 0 then
-        return
-    end
-
-    SetNetworkIdCanMigrate(pedNetId, false)
-
-    witnessNPCs[pedNetId] = witness
-
-    FreezeEntityPosition(witness, true)
-    SetEntityInvincible(witness, true)
-
-    RequestAnimDict("cellphone@")
-    while not HasAnimDictLoaded("cellphone@") do Wait(0) end
-    TaskPlayAnim(witness, "cellphone@", "cellphone_text_read_base", 8.0, -8.0, -1, 49, 0, false, false, false)
-
-    local witnessTexts = {
-        "Ich habe gesehen, wie er plötzlich umgefallen ist!",
-        "Er hat sich an die Brust gefasst und ist zusammengebrochen!",
-        "Das ging alles sehr schnell, ich konnte nichts tun!",
-        "Er ist einfach umgekippt – ohne Vorwarnung.",
-        "Ich glaube, es war ein medizinischer Notfall!"
-    }
-
-    exports['qb-target']:AddTargetEntity(witness, {
-        options = {
-            {
-                icon = "fas fa-comments",
-                label = "Was ist passiert?",
-                action = function()
-                    QBCore.Functions.Notify(witnessTexts[math.random(#witnessTexts)], "primary", 7500)
-                end
-            },
-            {
-                icon = "fas fa-check",
-                label = "Danke, Sie können gehen",
-                action = function()
-                    QBCore.Functions.Notify("Dankeschön, Ihnen noch einen schönen Tag.", "success", 7500)
-                    ClearPedTasks(witness)
-                    FreezeEntityPosition(witness, false)
-                    TaskWanderStandard(witness, 10.0, 10)
-
-                    npcManager2[pedNetId] = witness
-
-                    TriggerServerEvent("nx_emergency:setNPCNetId2", pedNetId)
-
-                    SetTimeout(15000, function()
-                        local witnessPed = NetworkGetEntityFromNetworkId(pedNetId)
-                        if DoesEntityExist(witnessPed) then
-                            DeletePed(witnessPed)
-                            witnessNPCs[pedNetId] = nil
-                            npcManager2[pedNetId] = nil
-                            TriggerServerEvent("nx_emergency:removeWitness", pedNetId)
-                        end
-                    end)
-                end
-            }
-        },
-        distance = 2.0
-    })
-end
-
-RegisterNetEvent("nx_emergency:deleteWitness")
-AddEventHandler("nx_emergency:deleteWitness", function(pedNetId)
-    local witness = witnessNPCs[pedNetId]
-
-    if witness and DoesEntityExist(witness) then
-        DeletePed(witness)
-        witnessNPCs[pedNetId] = nil
-    else
-
-    end
-end)
-
 
 RegisterNetEvent("nx_emergency:spawnNPC", function(data)
     CreateEmergencyNPC(data)
@@ -245,9 +99,7 @@ function TreatNPC(netId)
         disableCombat = true,
     }, {}, {}, function()
         ClearPedTasks(playerPed)
-        TriggerServerEvent("nx_emergency:stopCountdownForAll")
-        countdownActive = false
-        countdownTime = 0
+        TriggerServerEvent("nx_emergency:npcThreated")
     end, function()
         ClearPedTasks(playerPed)
 
@@ -255,17 +107,15 @@ function TreatNPC(netId)
         ClearPedTasks(ped)
         TaskWanderStandard(ped, 10.0, 10)
 
-        SetTimeout(15000, function()
+        SetTimeout(1500000, function()
             if DoesEntityExist(ped) then
                 DeletePed(ped)
                 npcManager[netId] = nil
                 TriggerServerEvent("nx_emergency:removeNPC", netId)
+                TriggerServerEvent("nx_emergency:npcThreated")
             end
         end)
         Wait(500)
-        TriggerServerEvent("nx_emergency:stopCountdownForAll")
-        countdownActive = false
-        countdownTime = 0
 
         QBCore.Functions.Notify("Bahdandlung abgeschlossen", "success")
     end)
@@ -276,15 +126,6 @@ RegisterNetEvent("nx_emergency:deleteNPC", function(netId)
     if ped and DoesEntityExist(ped) then
         DeletePed(ped)
         npcManager[netId] = nil
-    end
-end)
-
-RegisterNetEvent("nx_emergency:deleteWitness")
-AddEventHandler("nx_emergency:deleteWitness", function(pedNetId)
-    local witness = witnessNPCs[pedNetId]
-    if witness and DoesEntityExist(witness) then
-        DeletePed(witness)
-        witnessNPCs[pedNetId] = nil
     end
 end)
 

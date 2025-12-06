@@ -1,5 +1,6 @@
 QBCore = exports['qb-core']:GetCoreObject()
 local currentCall = nil
+local emergencyEnabled = true
 
 function SendDispatch(coords)
     local info = {
@@ -8,12 +9,13 @@ function SendDispatch(coords)
         coords = coords,
         message = Config.DispatchMessage
     }
-    TriggerClientEvent("nx_emergency:stopCountdown", -1)
     Wait(500)
     TriggerEvent('emergencydispatch:emergencycall:new', Config.DispatchJob, Config.DispatchMessage, coords, true)
 end
 
 function StartEmergencyCall()
+    if currentCall and currentCall.active then return end
+
     local spawnPoint = Config.SpawnLocations[math.random(#Config.SpawnLocations)]
     local scenario = Config.PossibleScenarios[math.random(#Config.PossibleScenarios)]
 
@@ -46,17 +48,9 @@ RegisterNetEvent("nx_emergency:checkForMedics", function()
             TriggerClientEvent("nx_emergency:startCountdown", id)
         end
     else
-        --TriggerClientEvent("QBCore:Notify", source, "Kein Mediziner im Dienst!", "error")
+
     end
 end)
-
-RegisterNetEvent("nx_emergency:stopCountdownForAll", function()
-    Wait(1000)
-    TriggerClientEvent("nx_emergency:stopCountdown", -1)
-end)
-
-
-
 
 function isAmbulanceOnDuty()
     local players = QBCore.Functions.GetPlayers()
@@ -74,41 +68,71 @@ end
 
 CreateThread(function()
     while true do
-        local randomWait = math.random(1500000, 3200000)
+        local randomWait = math.random(1500000, 2700000)
         local waitMinutes = math.floor(randomWait / 60000)
 
-        if waitMinutes >= 60 then
-            local hours = math.floor(waitMinutes / 60)
-            local minutes = waitMinutes % 60
-            print(("^3[nx_EmergencyResponse]^7 Nächster Einsatz wird in ^3%d Minuten^7 (^3%dh %dmin^7) generiert.")
-                :format(waitMinutes, hours, minutes))
+        if emergencyEnabled then
+            if waitMinutes >= 60 then
+                local hours = math.floor(waitMinutes / 60)
+                local minutes = waitMinutes % 60
+                print(("^3[nx_EmergencyResponse]^7 Nächster Einsatz wird in ^3%d Minuten^7 (^3%dh %dmin^7) generiert.")
+                    :format(waitMinutes, hours, minutes))
+            else
+                print(("^3[nx_EmergencyResponse]^7 Nächster Einsatz wird in ^3%d Minuten^7 generiert."):format(
+                    waitMinutes))
+            end
         else
-            print(("^3[nx_EmergencyResponse]^7 Nächster Einsatz wird in ^3%d Minuten^7 generiert."):format(waitMinutes))
+            print("^1[nx_EmergencyResponse]^7 Einsatzsystem ist deaktiviert – keine Einsätze werden generiert.")
         end
 
         Wait(randomWait)
 
-        if isAmbulanceOnDuty() then
+        if emergencyEnabled and isAmbulanceOnDuty() then
             StartEmergencyCall()
         else
-            print("^1[nx_EmergencyResponse]^7 Kein Sanitäter im Dienst, kein Einsatz generiert.")
+            print("^1[nx_EmergencyResponse]^7 Einsatz übersprungen.")
         end
     end
 end)
 
-
-
---[[ CreateThread(function()
-    while true do
-        Wait(5000)
-
-        if isAmbulanceOnDuty() then
-            StartEmergencyCall()
-        else
-        end
+RegisterCommand(Config.CommandStop, function(source)
+    local Player = QBCore.Functions.GetPlayer(source)
+    if not Player or Player.PlayerData.job.name ~= "ambulance" then
+        TriggerClientEvent('QBCore:Notify', source, "Keine Berechtigung!", "error")
+        return
     end
-end) ]]
 
+    emergencyEnabled = false
+    print("[nx_emergency] Einsatz-System wurde deaktiviert!")
+    TriggerClientEvent('QBCore:Notify', source, "Einsatzsystem deaktiviert!", "error")
+end)
+
+RegisterCommand(Config.CommandStart, function(source)
+    local Player = QBCore.Functions.GetPlayer(source)
+    if not Player or Player.PlayerData.job.name ~= "ambulance" then
+        TriggerClientEvent('QBCore:Notify', source, "Keine Berechtigung!", "error")
+        return
+    end
+
+    emergencyEnabled = true
+    print("[nx_emergency] Einsatz-System wurde aktiviert!")
+    TriggerClientEvent('QBCore:Notify', source, "Einsatzsystem aktiviert!", "success")
+end)
+
+
+
+RegisterCommand("EndEmergency", function(src, args, rawCommand)
+    EndEmergencyCall()
+    TriggerClientEvent('QBCore:Notify', src, "Einsatz wurde beendet.", "success")
+end)
+
+function EndEmergencyCall()
+    if currentCall and currentCall.active then
+        currentCall.active = false
+        TriggerClientEvent("nx_emergency:endNPC", -1)
+        print("[Emergency] Einsatz beendet.")
+    end
+end
 
 local activeNPCs = {}
 local activeNPCs2 = {}
@@ -131,21 +155,24 @@ AddEventHandler("nx_emergency:removeNPC", function(netId)
     activeNPCs[netId] = nil
 end)
 
-RegisterNetEvent("nx_emergency:spawnWitness")
-AddEventHandler("nx_emergency:spawnWitness", function(pedNetId)
-    TriggerClientEvent("nx_emergency:spawnWitnessClient", -1, pedNetId)
+RegisterNetEvent("nx_emergency:npcThreated", function()
+    if currentCall then
+        currentCall.active = false
+        currentCall = nil
+        print("[nx_emergency] NPC erfolgreich behandelt – Einsatz zurückgesetzt.")
+    end
 end)
 
 
-RegisterNetEvent("nx_emergency:removeWitness")
-AddEventHandler("nx_emergency:removeWitness", function(pedNetId)
-    activeNPCs[pedNetId] = nil
-    activeNPCs2[pedNetId] = nil
-    TriggerClientEvent("nx_emergency:deleteWitness", -1, pedNetId)
-end)
 
 RegisterNetEvent("nx_emergency:npcTimeout", function()
     TriggerClientEvent("nx_emergency:removeNPC", -1, netId)
+
+    if currentCall and currentCall.active then
+        currentCall.active = false
+        currentCall = nil
+        print("[nx_emergency] NPC Timeout – aktiver Einsatz wurde zurückgesetzt.")
+    end
 
     local players = QBCore.Functions.GetPlayers()
     for _, playerId in pairs(players) do
@@ -159,25 +186,8 @@ end)
 
 RegisterCommand("TriggerEmergency", function(source, args, rawCommand)
     local src = source
-    if src > 0 then
-        local Player = QBCore.Functions.GetPlayer(src)
-        if Player and Player.PlayerData.job.name == "ambulance" then
-            StartEmergencyCall()
-            TriggerClientEvent('QBCore:Notify', src, "Testeinsatz ausgelöst", "success")
-        else
-            TriggerClientEvent('QBCore:Notify', src, "Du bist kein Admin", "error")
-        end
-    else
-        StartEmergencyCall()
-        print("Einsatz wurde gestartet durch einen Admin")
-    end
-end)
-
-
-RegisterCommand("emtest", function(source, args, rawCommand)
-    local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    if not Player or Player.PlayerData.job.name ~= "admin" then
+    if not Player or Player.PlayerData.job.name ~= "ambulance" then
         TriggerClientEvent('QBCore:Notify', src, "Nur für Teamler vorbestimmt!", "error")
         return
     end
@@ -215,8 +225,6 @@ RegisterCommand("emtest", function(source, args, rawCommand)
     TriggerClientEvent('QBCore:Notify', src, "Testeinsatz: " .. arg .. " wurde gestartet.", "success")
 end)
 
-
-
 local green = "\27[32m"
 local blue = "\27[34m"
 local yellow = "\27[33m"
@@ -225,7 +233,7 @@ local cyan = "\27[36m"
 local red = "\27[31m"
 local reset = "\27[0m"
 
-local currentVersion = "v1.4.3"
+local currentVersion = "v1.7.1"
 
 local githubUser = "neroxservice"
 local githubRepo = "nx_emergencyresponse"
