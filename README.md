@@ -38,6 +38,13 @@ Es simuliert automatisierte Notrufe mit zufälligen Wartezeiten, sorgt für ein 
 - [**QB-Target**](https://github.com/qbcore-framework/qb-target/tree/main) für Interaktionen
 - [**EmergencyDispatch**](https://shop.loverp-scripts.de/package/4887641) `Anforderung - Anpassbar mit bisschen Coding Verstädnis`
 
+## 📝 To-Do Liste
+
+- [ ] Den NPC zum Krankenhaus bringen
+- [x] Kommands zum starten und stoppen der Automatisierung
+- [ ] NPC with Stretcher transportieren
+
+
 ## 🤝 Mitwirken
 - Pull Requests, Issues oder Funktionsvorschläge sind herzlich willkommen.
 - Hinterlasse ein ⭐ auf GitHub, wenn dir das Projekt gefällt.
@@ -48,4 +55,6 @@ Es simuliert automatisierte Notrufe mit zufälligen Wartezeiten, sorgt für ein 
 ```lua
 -- config.lua
 Config.SpawnInterval = 2700000 -- DEAKTIVIERT! Wird nun automatisch durch Random Timer ersetzt.
+Config.CommandStart = "custom name" added
+Config.CommandStop = "customname" added
 
