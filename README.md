@@ -19,7 +19,7 @@ Es simuliert automatisierte Notrufe mit zufälligen Wartezeiten, sorgt für ein 
  
 ### 🎯 Countdown
 - Es wird ein Countdown angezeigt wie lange der Einsatz noch active bleibt bis er deaktiviert wird.
-   [✅] Count resettet sich ebenfalls wieder richtig.
+   - [✅] Count resettet sich ebenfalls wieder richtig.
 
 ### 🧠 Intelligente Ressourcensteuerung
 - Einsätze werden **nur dann** gestartet, wenn der Server vollständig geladen und bereit ist.
@@ -37,13 +37,27 @@ Es simuliert automatisierte Notrufe mit zufälligen Wartezeiten, sorgt für ein 
 - Unterstützung für [**QBCore**](https://github.com/qbcore-framework/qb-core)
 - [**QB-Target**](https://github.com/qbcore-framework/qb-target/tree/main) für Interaktionen
 - [**EmergencyDispatch**](https://shop.loverp-scripts.de/package/4887641) `Anforderung - Anpassbar mit bisschen Coding Verstädnis`
+---
 
-## 📝 To-Do Liste
+## ✔️ To-Do Liste
 
-- [ ] Den NPC zum Krankenhaus bringen
+### 🚀 Projektstart
+- [x] Projekt erstellen
+- [x] README gestalten
+
+### 🎨 Frontend
+- [x] Responsives Layout erstellen
+- [x] Komponenten strukturieren
 - [x] Kommands zum starten und stoppen der Automatisierung
+
+### 🎨 Backend
+- [ ] Den NPC zum Krankenhaus bringen
 - [ ] NPC with Stretcher transportieren
 
+### 🧪 Tests
+- [ ] Unit Tests schreiben
+- [ ] E2E Tests vorbereiten
+---
 
 ## 🤝 Mitwirken
 - Pull Requests, Issues oder Funktionsvorschläge sind herzlich willkommen.
